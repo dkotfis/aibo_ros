@@ -1,0 +1,65 @@
+/* URBI chat: use chat.nick(name) to set your name
+  * chat.join(channel) joins a channel, messages sent to this chan will be displayed in your connction
+  * chat.send(channel, message) sends a message to the given channel
+  * chat.chat(message) sends a message to the last joined channel
+  * chat.leaves(channel) leaves a channel
+  * 
+  *  Event:
+  *    chat.message(channel, source, message);
+  */
+
+if (isdef(chat.join)) {
+
+  undef chat.join;
+  undef chat.leave;
+  undef chat.chat;
+  undef chat.send;
+  undef chat.nick;
+  undef chat.checkname;
+};
+
+function chat.join(channel) {
+
+  cid = local.connectionID;
+  chat.defaultchannel[cid]=channel;
+  if (isdef(chat.in[cid][channel]) && (chat.in[cid][channel] ==1))
+    return;
+  chat.in[cid][channel] = 1;
+
+  stopif(chat.in[cid][channel] ==0)
+    whenever (chat.message(static channel+"",source, message))
+      chat: echo "["+channel+"] <"+source+"> "+message;
+    };
+
+function chat.leave(channel) {
+  cid = local.connectionID;
+  chat.in[cid][channel] = 0;
+};
+
+function chat.checkname() {
+
+  cid = local.connectionID;
+  if (!isdef(chat.name[cid]))
+    chat.name[cid] = "anonymous_"+cid;
+};
+
+function chat.send(channel, msg) {
+
+  cid = local.connectionID;
+  chat.checkname();
+  chatmsg: emit chat.message(channel, chat.name[cid], msg);
+};
+
+function chat.chat(msg) {
+
+  cid = local.connectionID;
+  chat.checkname();
+  chatmsg: emit chat.message(chat.defaultchannel[cid], chat.name[cid], msg);
+};
+
+function chat.nick(name) {
+
+  cid = local.connectionID;
+  chat.name[cid] = name;
+};
+

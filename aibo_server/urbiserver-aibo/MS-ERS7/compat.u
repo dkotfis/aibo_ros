@@ -1,0 +1,32 @@
+#################################################################
+### Compatibility file. Used to maintain backward             ###
+### compatibility with older versions.                        ###
+#################################################################
+
+global.name = system.name;
+group motor { motors };
+group body { objects };
+
+// ERS-7 ////////////////////////////////////////////////////////
+
+if (system.name == "ERS-7") {
+
+  distanceFar = distance;
+},
+
+// ERS-210 //////////////////////////////////////////////////////
+
+if (system.name == "ERS-210") {
+
+  psd = distance;
+  headSensor = headSensorB;
+},
+
+// ERS-220 //////////////////////////////////////////////////////
+
+if (system.name == "ERS-220") {
+
+  psd = distance;
+  headSensor = headSensorB;
+},
+

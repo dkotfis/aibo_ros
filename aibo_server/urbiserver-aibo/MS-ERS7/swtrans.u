@@ -1,0 +1,328 @@
+
+##############################################################
+#                  AiboUrbi Postures                         #
+#                                                            #
+#                                                            #
+#  Postures of the robot are set with                        #
+#                                        robot.StandUp()     #
+#                                        robot.SitDown()     #
+#                                        robot.LayDown()     #
+#                                                            #
+##############################################################
+# User Functions  #
+
+
+if (isdef(robot.StandUp)) {
+  
+  undef robot.StandUp;
+  undef robot.SitDown;
+  undef robot.LayDown;
+  undef robot.stdStandedUp;
+  undef robot.stdSitedDown;
+  undef sit2stand.J1F;
+  undef sit2stand.J2F;
+  undef sit2stand.J3F;
+  undef sit2stand.J1H;
+  undef sit2stand.J2H;
+  undef sit2stand.J3H;
+  undef sit2stand.Head;
+  undef stand2sit.J1F;
+  undef stand2sit.J2F;
+  undef stand2sit.J3F;
+  undef stand2sit.J1H;
+  undef stand2sit.J2H;
+  undef stand2sit.J3H;
+  undef stand2sit.Head;
+  undef robot.sit2lay;
+  undef robot.lay2stand;
+  undef robot.stand2lay;
+  undef robot.sit2stand;
+  undef robot.stand2sit;
+  undef robot.MyguessPosition;
+};
+
+// Postures Functions check for the Position of the Robot, and then uses
+// a basic primitives to change its state.
+
+function robot.StandUp()
+{
+    wait(300);
+    a=robot.MyguessPosition();
+    if(a=="stand") return;
+    if(a=="unknown") {robot.initial() | robot.lay2stand()}
+    else { if(a=="sit") robot.sit2stand() else {if(a=="lay") robot.lay2stand()}};
+};
+
+function robot.SitDown()
+{
+    wait(300);
+    a=robot.MyguessPosition();
+    if(a=="sit") {speaker.play("beep.wav") ; return };
+    if(a=="unknown") {robot.initial() | robot.stdSitedDown()}
+    else { if(a=="stand") robot.stand2sit() else {if(a=="lay") robot.stdSitedDown()}};
+};
+
+function robot.LayDown()
+{
+    wait(300);
+    a=robot.MyguessPosition();
+    if(a=="lay") {speaker.play("beep.wav") ; return };
+    if(a=="unknown") {robot.initial()}
+    else { if(a=="stand") robot.stand2lay() else {if(a=="sit") robot.sit2lay()}};
+};
+
+
+
+
+
+#####################
+# FINAL POSITIONS   #
+#####################
+
+//StandUP
+
+function robot.stdStandedUp()
+{
+    leg1=-6 smooth:2000 &
+    leg2=3.5 smooth:2000 &
+    leg3=30 smooth:2000 &
+
+    neck=-25 smooth:1000 &
+    headPan=0 smooth:1000 &
+    headTilt=23 smooth:1000
+};
+
+// Sit Down
+
+function robot.stdSitedDown()
+{
+    headTilt= 5 smooth:1000 &
+    headPan= 0 smooth:1000 &
+    neck=-40 smooth:1000 &
+    legH1=-80 smooth :2000 &
+    legH2=19 smooth :2000 &
+    legH3=110 smooth :2000 |
+    legF1=-25 smooth :2000 &
+    legF2=-6 smooth :2000 &
+    legF3=20 smooth :2000
+
+};
+
+
+#######################  TRANSITION SIT TO STAND UP #############
+
+
+function sit2stand.J1F()
+{
+    wait(495) | {
+
+    {legRF1=2 time: 2003 | legRF1=-22 time: 1162 | legRF1=-12.16 time:760 |legRF1= -21 time:711 }
+    &
+    {legLF1=-28 time: 661 | legLF1=-2 time: 1342 | legLF1=-26 time:1092 |legLF1= -14.78 time:510 |legLF1= -22.33 time:521 |legLF1= -13.84 time:1212}
+
+    }| legF1=-6 time: 467
+
+};
+
+function sit2stand.J2F()
+{
+    {wait(165) | legRF2=4 time: 1822 | legRF2=5 time: 3145 | legRF2=3.5 time:1342 }
+    &
+    {wait(1096)| legLF2=4 time: 891 | wait(1412) | legLF2=-1.63 time: 1152 | legLF2=3.5 time: 1923}
+};
+
+function sit2stand.J3F()
+{
+    wait(495)| {
+    {legRF3=39 time: 32 | legRF3= 3 time: 1122 | wait(450) }
+    &
+    {legLF3=52 time:721 | legLF3=12 time:451 | wait(450) }
+    } | legF3=105 time: 770 | {
+    { legRF3=46 time: 1621 | legRF3=65 time: 622 |wait(440)}
+    &
+    { legLF3=52 time:1211 |  legLF3=64 time:641 }
+    }| legF3=30 time: 900
+
+};
+
+function sit2stand.J1H()
+{
+    wait(1607);
+    legH1=-98 time: 581 |
+    legH1= -6 time: 3705
+};
+
+function sit2stand.J2H()
+{
+    wait(1800)|legH2=18 time : 578 | wait(500) | legH2=6 time:315 |{
+    {legRH2=7 time:360 | wait(450)| legRH2=2 time: 901  }
+    &
+    {legLH2=5 time:360 | wait(450)| legLH2=10 time: 901 }
+    } | legH2=3.5 time: 1400
+};
+
+function sit2stand.J3H()
+{
+    wait(1667)|
+    legH3=125 time: 831|
+    wait(451) |
+    legH3=94 time: 450 | {
+    {legRH3=56 time:1022 | legRH3=34 time:521 | legRH3=44 time:190 | wait(571) }
+    &
+    {legLH3=61 time:1222 | legLH3=54 time:441 | legLH3=63 time:200 | legLH3=44 time:441 }
+    }| legH3=30 time:700 |
+
+};
+
+
+function sit2stand.Head()
+{
+    headPan=0 smooth:1000 &
+    { wait(2060) | headTilt=21 time: 1081 } &
+    { wait(1987) | neck=-49 time: 772 | neck=-28 time:1732 | wait(1509) | neck=-25 time:284 }
+
+};
+
+
+#######################  TRANSITION STAND TO SIT DOWN #############
+
+
+function stand2sit.J1F()
+{
+    legF1=-18 time: 631 |
+    legF1=-8  time: 2945 |
+    wait(831) |
+    legF1=-38 time: 1542 |
+    legF1=-26 time: 5760
+};
+
+function stand2sit.J2F()
+{
+    legF2=-0.5 time: 311 |
+    wait(4096) |
+    legF2=-6 time: 390
+};
+
+function stand2sit.J3F()
+{
+    wait(300)|
+    legF3=63 time: 771 |
+    wait(250) |
+    legF3=95 time: 581|
+    wait(2434) |
+    legF3=41 time: 1282|
+    wait(446) |
+    legF3=20 time :640
+};
+
+function stand2sit.J1H()
+{
+    legH1=-60 time: 900 |
+    wait(248) |
+    legH1=-106 time: 2115 |
+    legH1=-121 time: 390 |
+    legH1=-109 time: 251 |
+    legH1=-80  time:2439
+
+};
+
+function stand2sit.J2H()
+{
+    legH2=-1.63 time: 705 |
+    wait(1950) |
+    legH2=19 time: 450
+};
+
+function stand2sit.J3H()
+{
+    legH3=109 time: 900 |
+    wait(310) |
+    legH3=125 time: 633|
+    wait(1870) |
+    legH3=110 time: 511|
+};
+
+
+function stand2sit.Head()
+{
+ {headPan=0 time:300 & wait(4000)} |
+ {headTilt=5 time:1848 & neck=-40 time:1848 }
+
+};
+
+
+################################# Transition Sit to Lay #####################
+
+function robot.sit2lay()
+{
+    { legH1.val = -120 time:2000 &
+      legF1.val =   55 time:2000 } |
+    { head.val  =    0 time:2000 &
+      tail.val  =    5 time:2000 &
+      legF2.val =   -5 time:2000 &
+      legH2.val =    0 time:2000 &
+      legF3.val =   40 time:2000 &
+      legH3.val =  120 time:2000 }
+};
+
+function robot.lay2stand()
+{
+    robot.stdSitedDown()|
+    robot.sit2stand()
+};
+
+function robot.stand2lay()
+{
+    robot.stand2sit()|
+    robot.sit2lay()
+};
+
+function robot.sit2stand()
+{
+    sit2stand.J1F() &
+    sit2stand.J2F() &
+    sit2stand.J3F() &
+    sit2stand.J1H() &
+    sit2stand.J3H() &
+    sit2stand.J2H() &
+    sit2stand.Head()
+};
+
+function robot.stand2sit()
+{
+    stand2sit.J1F() &
+    stand2sit.J2F() &
+    stand2sit.J3F() &
+    stand2sit.J1H() &
+    stand2sit.J3H() &
+    stand2sit.J2H() &
+    stand2sit.Head()
+};
+
+
+####################################
+
+// MyguessPosition function, could be improved , it is too much "hand made"
+// not statistics tests has been done to prove its reliability.
+
+
+function robot.MyguessPosition() {
+
+    if (abs(accelY)>6)
+        return "side";
+    if (accelZ>0)
+        return "back";
+    if (accelX < -3.5) {
+        if( pawLF || pawRF)
+            return "sit"
+    };
+
+    if (abs(legLF1)<40 && abs(legRF1)<40 && abs(legLH1)<40 && abs(legRH1)<40)
+        return "stand";
+    if ((pawLF && pawLH) || (pawLF && pawLH) ) return "stand";
+
+    if (legLH1 < -50 && legRH1 < -50 && legRF2 < 5 && legLF2 <5 && legLF1 < 60 && legRF1 < 60 && legLF1 > 30 && legRF1 > 30)
+        return "lay";
+
+    return "unknown"
+};

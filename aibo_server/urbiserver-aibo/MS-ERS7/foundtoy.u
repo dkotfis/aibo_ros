@@ -1,0 +1,155 @@
+
+
+
+global.sty=0;
+global.bhvchoice=100;
+global.STAYMIN=2s;
+c.aux=100;
+load("swalk.u");
+
+
+function robot.letsFindToy() {
+
+    freeze ride;freeze stay;
+    ride : at(robot.imfree)
+           {
+              rd : goRide(),
+              global.sty++;
+              echo "LLAMAN!";
+           },
+
+    stay : at(global.sty  > c.aux )
+           {
+              freeze ride; stop rd;wait(300);
+              srw : goStay(),
+           },
+
+
+    startsearch : at(!ball.visible){ wait(300);unfreeze balltracking; ss:searchbhv(),}, //Just Relaunched if he sees the ball
+    stopsearch  : at(ball.visible)
+                  {
+                    stop startsearch;
+                    stop ss; // don't ever star a search
+                    stop stay;// don't ever count for a stay
+                    stop ride;// don't ever walk due to emits
+                    stop rd; // if you are walking , then stop
+                    stop srw ; // if you are staying then stop
+
+                    wait(300);foundIt();
+                    }, //Si la ve detenga la busqueda
+
+    };
+
+
+function searchbhv(){
+
+      {
+      c.aux=3+random(10);  // auxiliary to change behaviour aleatory
+      unfreeze ride;unfreeze stay;
+      emit robot.imfree;
+      }| speaker.play("bark.wav")
+};
+
+
+function goRide()
+{
+  wait(100);
+  headop=random(3);if(headop==3) headop=-1;
+  rideop=random(2);
+
+  wait(100+random(1s));
+
+  {
+    timeout(1s+random(5s)) {headPan'n=0.5 smooth:500;headPan'n = 0.5 sin : 3s ampli : 0.2,},
+    if(rideop==0) {wait(100);robot.CarefulWalk(3+random(7)) };
+    if(rideop==1) {wait(100);robot.CarefulTurn(2+random(7)) | wait(1s) };
+  } |  emit robot.imfree;     // At the end, he always will be free
+};
+
+
+
+function goStay()
+{
+    freeze ride; stop rd ;
+
+    ledF=1;speaker.play("bark.wav")|wait(500)| speaker.play("bark.wav");ledF=0;  // Ladridos y sentarse
+
+    timeout(3s+random(5s)) {headPan=0.5 smooth:500;headPan'n = 0.5 sin : 3s ampli : 0.2,},
+
+
+    bhvt=random(10s) ; if (bhvt < global.STAYMIN) bhvt=global.STAYMIN ;
+
+    aux=random(6); for(i=0;i<(2+aux);i++){ears=1; wait(100);ears=0;wait(100)};
+
+    aux2=random(2);
+
+    if(aux2==0) {  wait(200);robot.SitDown();wait(bhvt); robot.StandUp() };
+    if(aux2==1) {  wait(200);robot.LayDown();wait(bhvt); robot.StandUp() };
+
+    speaker.play("bark.wav"); global.sty=0;c.aux=3+random(10);
+
+    unfreeze ride ;emit robot.imfree
+};
+
+
+function foundIt(){
+
+    stop stopsearch ; // Just one foundIT
+    wait(500);speaker.play("bark2.wav");wait(500);speaker.play("bark2.wav");
+    happy();
+    goforit();
+};
+
+
+function goforit(){
+
+    //if(ball.size >2000) {happy(); wait(1s);robot.LayDown();stop aproach;stop fixit; happy();cleanall();}
+
+    //else {
+
+    alingit();
+
+    //fixit: at(abs(headPan) > 60 ) {freeze aproach;wait(500); alg: alingit();unfreeze aproach};
+
+
+    //aproach: while(ball.size < 2500) {robot.CarefulWalk(1); wait(100)};
+
+
+    wait(500);happy(); wait(1s);robot.LayDown();stop aproach;stop fixit; happy();robot.cleanall();
+
+    };
+
+
+
+function happy(){
+
+    timeout(random(5s)) { mouth'n = 0.5 sin : 200 ampli : 0.3,
+        tailPan'n = 0.5 sin : 200 ampli : 0.3, };
+        };
+
+
+function alingit(){
+
+    robot.StandUp();
+    aling : while(abs(headPan) > 60) { if(headPan<0) a=1 else a=-1; robot.CarefulTurn(a);};
+        wait(500); // despues de este alineamiento puede haber otros.
+        };
+
+function robot.cleanall()
+{
+    stop ftoy;
+    stop stay;// don't ever count for a stay
+    stop ride;// don't ever walk due to emits
+    stop rd; // if you are walking , then stop
+    stop srw ; // if you are staying then stop
+    stop aling;
+    stop alg;
+    stop aproach;
+    stop fixit;
+    stop startsearch;
+    stop stopsearch;
+    stop ss; // don't ever star a search
+};
+
+robot.cleanall();
+ftoy: robot.letsFindToy(),

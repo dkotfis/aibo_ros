@@ -1,0 +1,362 @@
+/***************************************************************
+Walk and turn movement URBI code.
+
+Contributors: * Laboratory of Robotics in Versailles (original walk)
+                  (if you have other walks, contact us)
+              * Matthieu Nottale (Fourier extraction)
+              * Assif Mirza (incremental turn)
+              * Frederic Lettelier (adaptation of the inc. turn for walk)
+
+Functions:
+  robot.walk(duration) : walk for duration milliseconds. 
+                         => Walk backward if duration is negative
+  robot.stopwalk()     : interrupt the walk
+  robot.turn(duration) : turn couterclockwise for duration milliseconds.
+                         => Turn clockwise if duration is negative
+  robot.stopturn()     : interrupt the turn
+
+  robot.initial()   : initial position sitting down (strech and lay)
+  robot.stretch()   : stretching like in the morning...
+  robot.lay()       : laying (sitting down)
+  robot.sit()       : sit on the back
+  robot.beg()       : stand up with knees bent
+  robot.stand()     : stand up
+
+Variables:
+  robot.walkspeed      : speed of walk, the smaller the faster: 
+                         period of a step. Defaults to 1s
+  robot.turnspeed      : speed of turn, the smaller the faster:
+                         period of a step. Defaults to 1s
+***************************************************************/
+
+########### WALK ##############
+
+legs.val->blend = mix;
+
+robot.walkspeed = 1s ; // how long for a walk cycle
+
+walk.turnamount = 0;
+
+// periods
+walk.coef[1] = 1;
+walk.coef[2] = 1/2;
+
+// mean values
+walk.mean[1][1] = -17.36,
+walk.mean[1][2] = 9.96,
+walk.mean[1][3] = 80.5,
+walk.mean[2][1] =  -28.8,
+walk.mean[2][2] = 11.1,
+walk.mean[2][3] = 90.3,
+
+//amp and phase:: [front/back][joint][sinnumber] 
+walk.amp[1][1][1]= 14.63,
+walk.phase[1][1][1]=1.81 ,
+walk.amp[1][1][2]=  2.49,
+walk.phase[1][1][2]= -1.09,
+
+walk.amp[1][2][1]= 2.20,
+walk.phase[1][2][1]=-2.33 ,
+walk.amp[1][2][2]=  0.88,
+walk.phase[1][2][2]= 1.78,
+
+walk.amp[1][3][1]= 13.50,
+walk.phase[1][3][1]=-1.73 ,
+walk.amp[1][3][2]=  5.31,
+walk.phase[1][3][2]= 1.26,
+
+
+walk.amp[2][1][1]= 14.65,
+walk.phase[2][1][1]=0.16 ,
+walk.amp[2][1][2]=  3.38,
+walk.phase[2][1][2]= -1.09,
+
+walk.amp[2][2][1]= 2.35,
+walk.phase[2][2][1]=-2.55 ,
+walk.amp[2][2][2]=  1.05,
+walk.phase[2][2][2]= 2.01,
+
+walk.amp[2][3][1]= 11.56,
+walk.phase[2][3][1]=-2.55 ,
+walk.amp[2][3][2]=  5.27,
+walk.phase[2][3][2]= 2.75,
+
+for |(x=1;x<=2;x++) 
+	for |(y=1;y<=2;y++)
+    for |(j=1;j<=3;j++) 
+      for |(d=1;d<=2;d++)
+        walk.phase[x][y][j][d] = walk.phase[x][j][d]+pi/2; //sin and not cos
+			
+//front-back phase shift
+for |(x=1;x<=2;x++)
+  for |(y=1;y<=2;y++)
+		for |(j=1;j<=3;j++) 
+			for |(d=1;d<=2;d++)
+				walk.phase[x][y][j][d] = walk.phase[x][y][j][d] -  walk.phase[x][1][1]*d;
+
+
+//left-right phase shift
+for &(x=1;x<=2;x++)
+  for &(j=1;j<=3;j++) 
+    walk.phase[x][2][j][1] = walk.phase[x][2][j][1] + pi;
+
+
+
+// Incremental Walk Function (by Frederic Lettelier, based on work by Assif Mirza)
+// A modification of the walk script that will save the current phase 
+// so that subsequent walks continue where they left off. 
+// We require 1 additional global variable
+// walk.direction :  saves which direction the last walk was in
+
+
+walk.direction=1;
+
+function robot.walk(duration)
+{
+   direction = 1;
+   if (duration < 0)
+   {
+      duration = - duration,
+      direction = -1
+   };
+
+   // if we are changing direction then switch the phase modifier
+   phasemod = 1;
+   if (walk.direction != direction)
+   {
+      phasemod = -1,
+      walk.direction = - walk.direction
+   };
+
+  	walk: {timeout(duration) {
+    	  for &(x=1;x<=2;x++)
+      	    for &(y=1;y<=2;y++)
+              for &(j=1;j<=3;j++)
+                for &(d=1;d<=2;d++)
+                  global.leg[x][y][j] = walk.mean[x][j]
+                                             sin:robot.walkspeed*walk.coef[d]
+                                             ampli:walk.amp[x][j][d]*4
+                                             phase: phasemod * (static walk.phase[x][y][j][d])+pi*(phasemod-1)/2
+                                             getphase:walk.phase[x][y][j][d]
+  	}
+   }
+};
+
+// robot.stopwalk function
+function robot.stopwalk()
+{
+  stop walk
+};
+
+
+######### TURN #############
+
+robot.turnspeed = 1s, // How long for a turn cycle
+
+turn.coef[1] = 1,
+turn.coef[2] = 1/2,
+turn.coef[3] = 1/3,
+
+// mean values
+turn.mean[1][1] = -19.4,
+turn.mean[1][2] = 17.833,
+turn.mean[1][3] = 82.18,
+turn.mean[2][1] =  -19.98,
+turn.mean[2][2] = 12.82,
+turn.mean[2][3] = 89.27,
+
+//amp and phase:: [front/back][joint][sinnumber] 
+turn.amp[1][1][1] = 7.704,
+turn.phase[1][1][1] = -0.518,
+turn.amp[1][1][2] = 2.689,
+turn.phase[1][1][2] = 1.058,
+turn.amp[1][1][3] = 0.739,
+turn.phase[1][1][3] = 2.923,
+
+turn.amp[1][2][1] = 8.025,
+turn.phase[1][2][1] = 2.970,
+turn.amp[1][2][2] = 2.916,
+turn.phase[1][2][2] = -1.697,
+turn.amp[1][2][3] = 1.007,
+turn.phase[1][2][3] = -0.055,
+
+turn.amp[1][3][1] = 10.758,
+turn.phase[1][3][1] = 1.933,
+turn.amp[1][3][2] = 4.527,
+turn.phase[1][3][2] = -2.750,
+turn.amp[1][3][3] = 0.266,
+turn.phase[1][3][3] = -1.373,
+
+
+turn.amp[2][1][1] = 5.945,
+turn.phase[2][1][1] = 0.720,
+turn.amp[2][1][2] = 1.546,
+turn.phase[2][1][2] = -1.259,
+turn.amp[2][1][3] = 0.968,
+turn.phase[2][1][3] = 2.654,
+
+turn.amp[2][2][1] = 6.715,
+turn.phase[2][2][1] = -2.507,
+turn.amp[2][2][2] = 1.819,
+turn.phase[2][2][2] = 1.978,
+turn.amp[2][2][3] = 1.016,
+turn.phase[2][2][3] = 0.024,
+
+turn.amp[2][3][1] = 10.518,
+turn.phase[2][3][1] = -1.445,
+turn.amp[2][3][2] = 4.13,
+turn.phase[2][3][2] = -2.898,
+turn.amp[2][3][3] = 0.061,
+turn.phase[2][3][3] = 1.539,
+
+
+//sin<=>cos conversion
+for |(x=1;x<=2;x++) 
+  for |(y=1;y<=2;y++)
+    for |(j=1;j<=3;j++) 
+      for |(d=1;d<=3;d++)
+        turn.phase[x][y][j][d] = turn.phase[x][j][d]+pi/2; 
+
+
+//front-back phase shift
+for |(x=1;x<=2;x++)
+  for |(y=1;y<=2;y++)
+    for |(j=1;j<=3;j++) 
+      for |(d=1;d<=3;d++)
+        turn.phase[x][y][j][d] = turn.phase[x][y][j][d] - turn.phase[x][1][1]*d;
+
+
+
+//left-right direction reverse for turning
+for &(x=1;x<=2;x++)
+  for &(j=1;j<=3;j++) 
+    for & (d=1;d<=3;d++)
+      turn.phase[x][2][j][d] = turn.phase[x][2][j][d]*(-1) + pi;
+
+//diagonal phase-shift
+for |(x=1;x<=2;x++)
+  for |(j=1;j<=3;j++) 
+    for |(d=1;d<=3;d++)
+      turn.phase[x][3-x][j][d] = turn.phase[x][3-x][j][d]+ pi*d/2;
+
+
+
+// Incremental Turn Function (by Assif Mirza)
+// A modification of the turn script that will save the current phase 
+// so that subsequent turns continue where they left off. 
+// We require 1 additional global variable
+// turn.direction :  saves which direction the last turn was in
+
+turn.direction=1;
+
+function robot.turn(duration)
+{
+   direction = 1;
+   if (duration < 0) {
+      duration = - duration,
+      direction = -1
+   };
+
+   // if we are changing direction then switch the phase modifier
+   phasemod = 1;
+   if (turn.direction != direction) {
+      phasemod = -1,
+      turn.direction = - turn.direction
+   };
+
+   turn: { timeout(duration) {
+         for &(x=1;x<=2;x++)
+         for &(y=1;y<=2;y++)
+         for &(j=1;j<=3;j++)
+         for &(d=1;d<=3;d++)
+            global.leg[x][y][j] = turn.mean[x][j] sin:robot.turnspeed*turn.coef[d] ampli:turn.amp[x][j][d]*6
+                                                phase:phasemod * (static turn.phase[x][y][j][d])+pi*(phasemod-1)/2
+                                                getphase:turn.phase[x][y][j][d]
+      }
+ }
+};
+
+// robot.stopturn function
+function robot.stopturn() 
+{
+  stop turn
+};
+
+#### Austin Tate posture scripts ####
+
+function robot.initial()
+{
+  { leg2.val  =   70 time:2000 &
+    leg3.val  =    0 time:2000 &
+    legH1.val = -135 time:2000 &
+    legF1.val =   55 time:2000 } |
+  { head.val  =    0 time:2000 &
+    tail.val  =    5 time:2000 &
+    legF2.val =   -5 time:2000 &
+    legH2.val =    0 time:2000 &
+    legH1.val = -120 time:2000 &
+    legF3.val =   40 time:2000 &
+    legH3.val =  120 time:2000 }
+};
+
+function robot.stretch()
+{
+  leg2.val  =   70 time:2000 &
+  leg3.val  =    0 time:2000 &
+  legH1.val = -135 time:2000 &
+  legF1.val =   55 time:2000
+};
+
+function robot.lay()
+{
+  head.val  =    0 time:2000 &
+  tail.val  =    5 time:2000 &
+  legF2.val =   -5 time:2000 &
+  legH2.val =    0 time:2000 &
+  legH1.val = -120 time:2000 &
+  legF3.val =   40 time:2000 &
+  legH3.val =  120 time:2000
+};
+
+
+function robot.sit()
+{
+  head.val  =   0 time:1000;
+  neck.val  = -40 time:1000 &
+  tail.val  =   0 time:2000 &
+  legH1.val = -75 time:2000 &
+  legH2.val =  15 time:2000 &
+  legH3.val = 120 time:2000 &
+  legF1.val = -45 time:2000 &
+  legF2.val = -10 time:2000 &
+  legF3.val =  10 time:2000
+};
+
+
+function robot.beg()
+{
+  head.val  =   0 time:1000;
+  neck.val  = -25 time:1000 &
+  tail.val  =   0 time:2000 &
+  legH1.val = -55 time:2000 &
+  legH2.val = -10 time:2000 &
+  legH3.val = 115 time:2000 &
+  legF1.val = -20 time:2000 &
+  legF2.val =   5 time:2000 &
+  legF3.val = 115 time:2000
+};
+
+function robot.stand()
+{
+  head.val  =   0 time:1000;
+  neck.val  =   0 time:1000 &
+  tail.val  =   0 time:2000 &
+  legH1.val = -25 time:2000 &
+  legH2.val =  10 time:2000 &
+  legH3.val =  80 time:2000 &
+  legF1.val = -20 time:2000 &
+  legF2.val =  25 time:2000 &
+  legF3.val =  90 time:2000
+};
+
+

@@ -1,0 +1,21 @@
+#################################################################
+### Default ERS220 config file                                ###
+#################################################################
+
+speaker->blend = queue;
+
+// Robot-specific aliases
+
+group head {headRoll,headPan,headTilt},
+group ledTail {ledTailC,ledTailR,ledTailL},
+group ledFace {ledBL,ledCL,ledBR,ledCR,ledFL,ledFR,ledHead,ledA,ledB,ledC,ledRetractHead},
+group ledBack {ledL1,ledL2,ledL3,ledR1,ledR2,ledR3},
+
+// URBI animation
+
+anim+bg: {
+  anim:ledA = 1 &
+  anim:ledB = 1 &
+  anim:ledC = 1 &
+  anim:ledTailC = 0.5 sin:4s ampli:0.6
+};

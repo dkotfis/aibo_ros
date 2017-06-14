@@ -1,0 +1,98 @@
+#################################################################
+### Default ERS7 config file                                  ###
+#################################################################
+###                                                           ###
+### NEW: included demos                                       ###
+###  * Right Left Paw + Front Backsensor: walk demo           ###
+###  * Right Left Paw + Middle Backsensor : ball tracking     ###
+###  * Right Left Paw + Back Backsensor: Daft Punk dance      ###
+###                                                           ###
+###  * Press chinsensor for 2s to do motors on/off            ###
+###                                                           ###
+#################################################################
+
+// Robot-specific aliases
+
+group head {neck,headPan,headTilt,mouth},
+group tail {tailPan,tailTilt},
+group ears {earR,earL},
+
+group ledF {ledF1,ledF2,ledF3,ledF4,ledF5,ledF6,ledF7,
+            ledF8,ledF9,ledF10,ledF11,ledF12,ledF13,ledF14},
+
+group ledHead {modeR,modeG,modeB,ledHC,ledHW},
+group ledBW {ledBFW,ledBMW,ledBRW},
+group ledBC {ledBFC,ledBMC,ledBRC},
+
+// URBI animation
+
+anim+bg: {
+  anim:ledF12 = 1 &
+  anim:ledBFW = 0.2 sin:4s ampli:0.5  &
+  anim:ledBMW = 0.2 sin:4s ampli:0.5 phase:(pi/3)  &
+  anim:ledBRW = 0.2 sin:4s ampli:0.5 phase:(2*pi/3)
+};
+
+### Austin Tate cool demo scripts ###
+
+// motor switch
+motorswitch:at ((chinSensor > 0) && (!pawRF) ~ 2s) {
+
+  speaker.play("beep.wav");
+  motors switch;
+};
+
+// simple walk demo
+walkdemo:at ((backSensorF > 10) && (pawRF.val) ~ 1s) {
+
+  speaker.play("beep.wav");
+  wait (1000);
+  ledBFC = 1;
+  walk.speed = 640;
+  turn.speed = 640;
+  robot.walk(3000);
+  robot.walk(-3000);
+  robot.turn(3000);
+  robot.turn(-3000);
+  ledBFC = 0
+};
+
+// Ball tracking head demo
+robot.bt = 0;
+btdemo:at ((backSensorM > 10) && (pawRF.val) ~ 1s) {
+
+  speaker.play("beep.wav");
+  robot.bt = 1 - robot.bt; // switch
+  if (robot.bt) unfreeze balltracking
+  else          freeze balltracking;
+  ledBMC = robot.bt;
+};
+
+
+// note must press for a second to activate DANCE.U - does not start/end cleanly
+dancedemo:at ((backSensorR > 10) && (pawRF.val) ~ 1s) {
+ 
+  speaker.play("beep.wav");
+  ledBRC = 1;
+  robot.sit(); // you need to give a little help to the robot here...
+                  // anyone with a good URBI script to have the robot sit
+                  // properly for the dance?
+  load("dance.u");
+  waituntil (speaker.remain == 0);
+  robot.sit();
+  ledBRC = 0;
+};
+
+### Diego Pardo simple behavior script:
+### (thanks Diego!)
+global.hcounter=0;
+global.bk=0;
+simpledemo1: at(headSensor) global.hcounter++;
+simpledemo2: at(global.hcounter){wait(1000); global.hcounter=0;},
+simpledemo3: at(global.hcounter==3){ global.hcounter=0;speaker.play("bark.wav");
+                                     motor on; wait(1s);load("foundtoy.u");},
+
+simpledemo4: at(backSensorR){global.bk++;},
+simpledemo5: at(global.bk) {wait(1000);global.bk=0;},
+simpledemo6: at(global.bk==3) {speaker.play("beep.wav");robot.cleanall();global.bk=0},
+

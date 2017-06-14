@@ -1,0 +1,92 @@
+// std.u is a basic "standard" set of scripts for aibo
+// normally, you want to include it at the beginning
+// of your URBI.INI file
+
+
+if (system.name == "ERS-7")   load("ers7.ini");
+if (system.name == "ERS-210") load("ers210.ini");
+if (system.name == "ERS-220") load("ers220.ini");
+
+// adding the .val aliases
+group objects { motors, bimotors, leds, touchsensors,
+                irsensors, buttonsensors, accelsensors,
+                genericsensors,
+                video, audio_in, audio_out,
+		camera, speaker, micro
+             };
+group hardware { motors, bimotors, leds, touchsensors,
+                 irsensors, buttonsensors, accelsensors,
+                 genericsensors,
+                 camera, speaker, micro
+               };
+group software { ball, colormap, movement };
+
+foreach& dev in group hardware {
+  alias $(dev) $(dev+".val");
+};
+
+load("swalk.u");
+if (system.name == "ERS-7")   load("ers7.u");
+if (system.name == "ERS-210") load("ers210.u");
+if (system.name == "ERS-220") load("ers220.u");
+
+// Starting useful objects
+ball = new colormap("camera.raw",0,255,120,190,150,230, 0.0015);
+speaker.clientstart = loadwav("client.wav");
+
+
+/***********************
+*                      *
+*   BASIC GROUPING     *
+*                      *
+************************/
+
+group legRF {legRF1,legRF2,legRF3},
+group legLF {legLF1,legLF2,legLF3},
+group legRH {legRH1,legRH2,legRH3},
+group legLH {legLH1,legLH2,legLH3},
+group legs  {legRF,legLF,legRH,legLH},
+group leg1  {legRF1,legLF1,legRH1,legLH1},
+group leg2  {legRF2,legLF2,legRH2,legLH2},
+group leg3  {legRF3,legLF3,legRH3,legLH3},
+
+group legF1 {legRF1,legLF1},
+group legF2 {legRF2,legLF2},
+group legF3 {legRF3,legLF3},
+group legH1 {legRH1,legLH1},
+group legH2 {legRH2,legLH2},
+group legH3 {legRH3,legLH3},
+
+group legR1 {legRF1,legRH1},
+group legR2 {legRF2,legRH2},
+group legR3 {legRF3,legRH3},
+group legL1 {legLF1,legLH1},
+group legL2 {legLF2,legLH2},
+group legL3 {legLF3,legLH3},
+
+legs->blend = mix;
+
+#odd/even leg pair groups (using the 'exec' function)
+for (i=1;i<4;i++) exec("group legE"+string(i)+" {legLH"+
+                       string(i)+",legRF"+string(i)+"};");
+for (i=1;i<4;i++) exec("group legO"+string(i)+" {legLF"+
+                       string(i)+",legRH"+string(i)+"};");
+
+// Useful aliases
+
+alias  global.leg[1][1][1] legLF1.val;
+alias  global.leg[1][1][2] legLF2.val;
+alias  global.leg[1][1][3] legLF3.val;
+alias  global.leg[1][2][1] legRF1.val;
+alias  global.leg[1][2][2] legRF2.val;
+alias  global.leg[1][2][3] legRF3.val;
+alias  global.leg[2][1][1] legLH1.val;
+alias  global.leg[2][1][2] legLH2.val;
+alias  global.leg[2][1][3] legLH3.val;
+alias  global.leg[2][2][1] legRH1.val;
+alias  global.leg[2][2][2] legRH2.val;
+alias  global.leg[2][2][3] legRH3.val;
+
+// Save CPU power if not needed
+
+movement off;

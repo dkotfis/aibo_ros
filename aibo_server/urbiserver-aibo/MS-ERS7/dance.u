@@ -1,0 +1,641 @@
+##############################################
+### Daft Punk Aibo Dance, by Diego Pardo   ###
+### Made for the Sony Aibo Dance contest   ###
+### Winner, first price! Congratulation!   ###
+##############################################
+
+stop events; noop;// prevents previous 'at' commands to superimpose
+
+mouth->blend    = mix;
+headTilt->blend = mix;
+headPan->blend  = mix;
+
+group ledCabeza   { ledF1,ledF2,ledF3,ledF4,ledF5,ledF6,ledF7,
+                    ledF8,ledF9,ledF10,ledF11,ledF12,ledF13,ledF14 };
+group Orejas      { earL, earR };
+group ledEspecial { ledF1,ledF2,ledF13,LedF14 };
+
+ledCabeza->blend = mix;
+
+
+if (isdef(Inicial)) 
+{
+  undef Inicial;
+  undef mov1;
+  undef Cabeza;
+  undef Chispun;
+  undef Chislado;
+  undef LucesCabeza;
+  undef boca;
+  undef boca2;
+  undef onda;
+  undef cuello;
+  undef Abrebrazos;
+  undef Subebaja;
+  undef sentar;
+  undef brazos;
+  undef doblarodillas;
+  undef IrBajando;
+  undef LucesBajando;
+  undef Travolta;
+  undef Travolta2;
+  undef ladolado;
+  undef Luztravolta;
+  undef Luztravolta2;
+  undef LuzRojabit;
+  undef LuzCentro;
+  undef moverorejas;
+};
+
+
+function Inicial()
+{
+   headPan.val'n  = 0.5 smooth:1000,
+   headTilt.val'n = 0.4 smooth:1000,
+   neck.val'n     = 0.2 smooth:1000,
+
+   legRF1.val'n   = 0.6 smooth:1000,
+   legRF2.val'n   = 0   smooth:1000,
+   legRF3.val'n   = 0.3 smooth:1000,
+   
+   legLF1.val'n   = 0.4      smooth:1000,
+   legLF2.val'n   = 0.145473 smooth:1000,
+   legLF3.val'n   = 0.99     smooth:1000,
+
+   legLH1.val'n   = 0.281059 smooth:1000,
+   legRH1.val'n   = 0.349205 smooth:1000,
+
+   legLH2.val'n   = 0.015000 smooth:1000,
+   legRH2.val'n   = 0.011740 smooth:1000,
+
+   legLH3.val'n   = 0.975802 smooth:1000,
+   legRH3.val'n   = 0.964802 smooth:1000,
+
+   ledCabeza.val'n = 0;
+
+   mouth.val'n = 1 smooth:1000;
+   modeB.val   = 0;
+   modeR.val   = 0;
+   modeG.val   = 0;
+   ledWifi.val = 0;
+};
+
+
+function mov1()
+{
+   ledF14.val'n  = 1;
+   legRF2.val'n  = 1   smooth:500 &
+   headPan.val'n = 0.1 smooth:500;
+};
+
+
+function Cabeza()
+{
+   timeout(2s) headTilt.val'n = 0.4 sin:457 ampli:0.1;
+   timeout (3s) headTilt.val'n = 0.4 sin:457 ampli:0.1 &
+   headPan.val'n  = 0.5 smooth:2000;
+};   
+
+
+function Chispun(j)
+{
+   timeout(j) headTilt.val'n = 0.4 sin:457 ampli:0.15;
+};   
+
+function Chislado(j)
+{
+   timeout(j) headPan.val'n=0.5 sin:700 ampli:0.15;
+};   
+
+
+
+function LucesCabeza()
+{
+  loopn(3)
+  {
+    ledHC.val=1;
+    wait(457);
+    ledHC.val=0;
+    ledHW.val=1;
+    wait(457);
+    ledHW.val=0;
+    wait(457);
+  };
+};
+
+
+function boca()
+{
+   global.ledMode=0;
+   ledCabeza.val=1 &
+   mouth.val'n=0.1 smooth:100;
+   mouth.val'n=0.6 smooth:100;
+   ledCabeza.val=0;
+};
+
+function boca2()
+{
+   global.ledMode=1;
+   ledEspecial.val=1 &
+   mouth.val'n=0.1 smooth:100;
+   mouth.val'n=0.6 smooth:100;
+   ledEspecial.val=0;
+};
+
+
+
+function onda()
+{
+  legLF2.val'n=0.08,
+  legRF2.val'n=0.08,
+  modeR.val=0,
+  modeB.val=0,
+  modeG.val=0,
+    
+  loopn(4)
+  { 
+   earL.val=0,
+   earR.val=0,
+   modeR.val=0;
+
+   legLF1.val'n=0.6 smooth:250 &
+   legRF1.val'n=0.45 smooth:250;
+
+   legLF3.val'n=0.60 smooth:200 &
+   legRF3.val'n=0.15 smooth:200;
+
+   legLF1.val'n=0.45 smooth:250 &
+   legRF1.val'n=0.6 smooth:250;
+
+   legLF3.val'n=0.15 smooth:200 &
+   legRF3.val'n=0.60 smooth:200;
+   earL.val=1 &
+   earR.val=1 &
+   modeR.val=1;
+
+  };
+  
+  earL.val=0;
+  earR.val=0;
+  
+  {legLF1.val'n=0.55 smooth:250 &
+  legRF1.val'n=0.55 smooth:250};
+
+  {legLF3.val'n=0.50 smooth:250 &
+  legRF3.val'n=0.50 smooth:250};
+
+  modeR.val=0;
+  modeB.val=1;
+};
+
+function cuello()
+{
+   timeout(4s) neck.val'n=0.2 sin:600 ampli:0.15;
+   neck.val'n=0.1 smooth:150;
+};
+
+function Abrebrazos()
+{
+   legLF2.val'n=0.99 smooth:457 &
+   legRF2.val'n=0.99 smooth:457 ;
+   legLF3.val'n=0 smooth: 457 &
+   legRF3.val'n=0 smooth: 457 ;
+
+   wait(100);
+};
+
+function Subebaja()
+{
+   timeout(2s) legRF3.val'n=0.3 sin:914 ampli:0.2 &
+   timeout(2s) legLF3.val'n=0.3 sin:914 ampli:0.2;
+};
+
+function sentar()
+{
+   legRF1.val'n=0.48  smooth:800,   
+   legRF2.val'n=0.060653 smooth:800,
+   legRF3.val'n=0.189336 smooth:800,
+
+
+   legLF1.val'n=0.415589 smooth:800,   
+   legLF2.val'n=0.060653 smooth:800,
+   legLF3.val'n=0.189336 smooth:800,
+
+   legRH1.val'n=0.218318 smooth:900,   
+   legRH2.val'n=0.37826 smooth:900,
+   legRH3.val'n=0.858136 smooth:900,
+
+
+   legLH1.val'n=0.218318 smooth:900,   
+   legLH2.val'n=0.37826  smooth:900,
+   legLH3.val'n=0.858136 smooth:900;
+};
+
+
+
+
+
+///////////////// MAIN ///////////////////
+
+function brazos()
+{
+   {timeout(4.5s) legRF1.val'n=0.6 sin:457 ampli:0.05 &
+    LucesCabeza() &  // IMPORTANTE
+    timeout(4s) legLF1.val'n=0.6 sin:457 phase:3.1415962 ampli:0.05
+   };
+   
+
+   {Chispun(4000) & {Abrebrazos(); Subebaja()} } ;
+ 
+   onda() ;
+    
+
+   {legRF1.val'n=0.48  smooth:800,   
+   legRF2.val'n=0.060653 smooth:800,
+   legRF3.val'n=0.189336 smooth:800,
+
+
+   legLF1.val'n=0.415589 smooth:800,   
+   legLF2.val'n=0.060653 smooth:800,
+   legLF3.val'n=0.189336 smooth:800,};
+
+  earL.val=0;
+  earR.val=0;
+};
+
+  
+
+/////////////////////////////////////////////
+
+
+
+
+
+
+
+
+function doblarodillas()
+{
+   timeout(3s) legLF3.val'n=0.3 sin:457 ampli:0.1, 
+   timeout(3s) legRF3.val'n=0.3 sin:457 ampli:0.1;
+};
+
+
+function IrBajando()
+{
+
+  legRH1.val'n=0.15 smooth:3000 &
+  legLH1.val'n=0.15 smooth:3000
+};
+
+
+function LucesBajando()
+{
+  ledCabeza.val=0;
+
+  loopn(4)
+  {
+    global.ledMode=0;
+    ledF14.val=1 & ledF13.val'n=1;
+    wait(250);
+    ledF14.val=0 & ledF13.val'n=0;
+    ledF12.val=1 & ledF11.val'n=1;
+    wait(200);
+    ledF12.val=0 & ledF11.val'n=0;
+    global.ledMode=1;
+    ledF13.val=1 & ledF14.val'n=1; 
+    ledF1.val=1 & ledF2.val'n=1; 
+    ledF3.val=1 & ledF4.val'n=1; 
+    wait(250);
+    ledF13.val=0 & ledF14.val'n=0; 
+    ledF1.val=0 & ledF2.val'n=0; 
+    ledF3.val=0 & ledF4.val'n=0; 
+    wait(200);
+  };
+  ledCabeza.val=1;
+};
+
+
+function Travolta()
+{
+  legRF1.val'n=0.75 smooth:457,
+  headTilt.val'n=0.5 smooth:457,
+  headPan.val'n=0.5 smooth:457,
+  neck.val'n=0.2 smooth:457 |
+
+  loopn(2)
+  {      
+    {legRF1.val'n=0.95 smooth : 325,
+      legRF2.val'n=0.4 smooth  :325,
+      headPan.val'n=0.1 smooth  :325,
+      headTilt.val'n=0.90 smooth :325;
+      wait(50)};
+
+    {legRF1.val'n=0.75 smooth :325,
+      legRF2.val'n=0.02 smooth :325,
+      headPan.val'n=0.5 smooth :325,
+      headTilt.val'n=0.5 smooth :325;
+      wait(50)};
+  };
+  
+  legRF1.val'n=0.5 smooth:457;
+};
+
+
+function Travolta2()
+{
+  legLF1.val'n=0.75 smooth:457,
+  headTilt.val'n=0.5 smooth:457,
+  headPan.val'n=0.5 smooth:457,
+  neck.val'n=0.2 smooth:457 |
+
+  loopn (2)
+  {     
+    {legLF1.val'n=0.95 smooth : 325,
+      legLF2.val'n=0.4 smooth  :325,
+      headPan.val'n=0.9 smooth  :325,
+      headTilt.val'n=0.90 smooth :325;
+      wait(50)};
+
+    {legLF1.val'n=0.75 smooth :325,
+      legLF2.val'n=0.02 smooth :325,
+      headPan.val'n=0.5 smooth :325,
+      headTilt.val'n=0.5 smooth :325;
+      wait(50)};
+  };
+   
+  legLF1.val'n=0.5 smooth:457;
+};
+
+function ladolado()
+{
+
+   legRF2.val'n=0.15 smooth:600,
+   legLF2.val'n=0.15 smooth:600,
+   
+   headTilt.val'n=0.5 smooth:600;
+   Chislado(3000) &
+
+   { timeout(3s) legRF3.val'n=0.2 sin:600 ampli:0.2&
+     timeout(3s) legLF3.val'n=0.2 sin:600 ampli:0.2 phase:3.1415962}
+};
+
+
+function Luztravolta()
+{
+  ledF4.val=1;
+  wait(100);
+  ledF6.val=1;
+  wait(100);
+  ledF5.val=1;
+  wait(100);
+  ledF3.val=1;
+  wait(50);
+
+  ledF4.val=0;
+  ledF6.val=0;
+  ledF5.val=0;
+  ledF3.val=0;
+
+  ledF7.val=1;
+  wait(100);
+  ledF9.val=1;
+  wait(100);
+  ledF10.val=1;
+  wait(100);
+  ledF8.val=1;
+  wait(50);
+
+  ledF7.val=0;
+  ledF9.val=0;
+  ledF10.val=0;
+  ledF8.val=0;
+};
+
+
+
+function Luztravolta2()
+{
+  ledF3.val=1;
+  wait(100);
+  ledF5.val=1;
+  wait(100);
+  ledF6.val=1;
+  wait(100);
+  ledF4.val=1;
+  wait(50);
+
+  ledF3.val=0;
+  ledF5.val=0;
+  ledF6.val=0;
+  ledF4.val=0;
+
+  ledF8.val=1;
+  wait(100);
+  ledF10.val=1;
+  wait(100);
+  ledF9.val=1;
+  wait(100);
+  ledF7.val=1;
+  wait(50);
+
+  ledF7.val=0;
+  ledF9.val=0;
+  ledF10.val=0;
+  ledF8.val=0;
+};
+
+function LuzRojabit()
+{
+  global.ledMode=0;
+  ledF14.val=1;
+  ledF13.val=1;
+  wait(850);
+  ledF14.val=0;
+  ledF13.val=0;
+  wait(850);
+};
+
+function LuzCentro()
+{
+  global.ledMode=0;
+  ledF11.val=1;
+  ledF12.val=1;
+  wait(850);
+  ledF11.val=0;
+  ledF12.val=0;
+  wait(850);
+};
+
+
+function moverorejas()
+{
+  Orejas.val=1 &
+  modeB.val=1;
+
+  wait(100);
+
+  Orejas.val=0 &
+  modeB.val=0;
+
+  wait(100);
+
+  Orejas.val=1 &
+  modeG.val=1;
+
+  wait(100);
+
+  Orejas.val=0 &
+  modeG.val=0;
+
+  wait(100);
+
+  Orejas.val=1 &
+  modeR.val=1;   
+
+  wait(100);
+
+  Orejas.val=0 &
+  modeG.val=0;
+
+  wait(100);
+};
+
+
+
+
+///////////////// CATCHING EVENTS /////////////////////
+
+events:{
+ 
+at &(speaker.remain=~=29025 || speaker.remain=~=28775 || speaker.remain=~=28525 || speaker.remain=~=28325)
+{
+ boca(),
+},
+
+
+at &(speaker.remain=~=27125 || speaker.remain=~=26950 || speaker.remain=~=26675 || speaker.remain=~=26425)   
+{
+ boca2(),
+},
+
+
+at(speaker.remain=~=29030)
+{
+  mov1(),   // Cabeza y Brazo a la Izquierda
+},
+
+
+
+at(speaker.remain=~=28550)
+{
+  legRF2.val'n=0 smooth:1000;
+  legRF1.val'n=0.6 smooth:1000,
+  legRF3.val'n=0.3 smooth:1000,
+},
+
+
+at(speaker.remain=~=28200)
+{
+  legLF1.val'n=0.55 smooth:300 &
+  legLF2.val'n=0 smooth:300 &
+  legLF3.val'n=0.3 smooth:300,
+
+  Orejas.val=1 &
+  modeB.val=1;
+
+  wait(100);
+
+  Orejas.val=0 &
+  modeB.val=0;
+
+  wait(100);
+
+  Orejas.val=1 &
+  modeG.val=1;
+
+  wait(100);
+
+  Orejas.val=0 &
+  modeG.val=0;
+
+  wait(100);
+
+  Orejas.val=1 &
+  modeR.val=1;   
+},
+
+
+at(speaker.remain=~=26225)
+{
+ Cabeza(),
+ loopn(100) { LuzRojabit(); LuzCentro();};
+
+},
+
+at(speaker.remain=~=26260)
+{
+ loopn(100) 
+ {
+   LuzRojabit();
+   LuzCentro();
+ };
+
+},
+
+
+
+at(speaker.remain=~=25225)
+{
+
+ brazos();
+
+ sentar();
+
+ {doblarodillas() & Chislado(2800)};
+
+
+ Travolta();
+ Travolta2();
+ ladolado() ;
+ 
+},
+
+
+at(speaker.remain=~=20000)
+{
+ global.ledMode=0;
+ loopn (2)
+ {
+  loopn (50)
+  {
+   ledCabeza.val=1;
+   wait(457);
+   ledCabeza.val=0;
+  };
+  global.ledMode=1;
+ }
+
+},
+
+
+at(speaker.remain=~=10000)
+{
+ Luztravolta();
+ Luztravolta2();
+},
+
+
+at(speaker.remain=~=13000)
+{
+ LucesCabeza(),
+ moverorejas(),
+
+},
+
+}; // end events
+// Main program
+
+Inicial();
+speaker.play("tecno.wav"),
+

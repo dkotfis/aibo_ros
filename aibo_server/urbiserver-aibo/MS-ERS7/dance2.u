@@ -1,0 +1,224 @@
+/* Test of dance in Urbi for ERS-7 by Nilhcem 27-10-2005*/
+// The script was made for Aibo ERS-7 placed on its base station 
+
+// Management of errors 
+mouth.val->blend = mix; // Will average the simultaneous actions I will ask him to do
+headTilt.val->blend = mix;
+headPan.val->blend=queue; // If I ask him to make 2 actions concerning the headPan 
+                          // simultaneously, it will do them one after the other
+legLF3.val->blend=queue;
+legRF3.val->blend=queue;
+
+
+//aliases
+   group PattesAvant1   {legRF1,legLF1 };
+   group PattesAvant2   {legRF2,legLF2 };
+   group PattesAvant3   {legRF3,legLF3 };
+   group PattesArriere1 {legRH1,legLH1 };
+   group PattesArriere2 {legRH2,legLH2 };
+   group PattesArriere3 {legRH3,legLH3 };
+   group Lumieres       {ledF1,ledF2,ledF3,ledF4,ledF5,ledF6,ledF7,ledF8,ledF9,ledF10,ledF11,ledF12,ledF13,ledF14,ledBFC,ledBFW,ledBMC,ledBMW,ledBRC,ledBRW,ledHC,ledHW,modeB,modeG,modeR,ledWIFI};
+   group Yeux {ledF3,ledF4,ledF5,ledF6,ledF7,ledF8}; // Eyes of Aibo
+
+
+
+if (isdef(Initialisation)) 
+{
+  undef Initialisation;
+  undef PattesArriere;
+  undef PattesAvant;
+  undef Tete;
+  undef Queue;
+  undef setLumieres;
+};
+
+
+
+function Initialisation() // Procedure which puts Aibo in a correct position on its station before beginning the dance
+{
+   motors on; // Start the motors
+   Lumieres=0; // We swich off all the leds
+
+   // initialze the front legs position
+   PattesAvant3=30 time:1000;
+   PattesAvant1=40 time:1000;
+   PattesAvant2=0  time:1000 & PattesAvant1=25 time:1000;
+
+   // initialize the back legs 
+
+   PattesArriere1=-55 time:1000;
+   PattesArriere2=0   time:1000;
+   PattesArriere3=0   time:1000;
+
+   // intialize the head and the tail
+   tetequeue:headPan=0 time:1000 & mouth=-3 time:500 & neck=-79 time:1000 & headTilt=-16 time:1000 & tailPan=0 time:1000 & tailTilt=63 time:1000;
+};
+
+
+function PattesArriere() // dance with of the back legs, for 5 seconds 
+{
+
+   legLH2=90 time:1000 | legRH2=90 time:1000; // draw aside the back legs 
+
+   legLH3=-25 time:1000 | legRH3=-25 time:1000; // Raise the end of the legs 
+
+   PattesArriere1=134 time:1000; // Turn the legs 
+
+
+   PattesArriere2=0 time:1000; // Bring closer the legs 
+
+   legLH1=90 time:1000; // Lower the left leg 
+
+   legRH1=90 time:1000 & legLH1=134 time:1000; // Lower the back right leg and raise the back left leg 
+
+   legLH1=90 time:1000 & legRH1=134 time:1000; // Lower the back left leg and raise the back right leg 
+
+   legRH1=90 time:1000 & legLH1=134 time:1000; // Same action
+
+
+   legLH1=90 time:1000 & legRH1=134 time:1000; // Same action
+
+   legLH1=134 time:1000; // Raise the back left leg
+
+   legLH3=119 time:1000; // Raise the end of the left leg 
+
+   legRH3=119 time:1000; // Raise the end of the rigtht leg 
+
+   legLH2=90 time:1000; // Draw aside the back left leg 
+
+
+
+   legRH2=90 time:1000; // draw aside the back right leg
+
+   wait (1s); // Pause for 1s
+
+   PattesArriere2=0 time:1000; // Bring closer the back legs
+
+   wait (1s);
+
+   PattesArriere2=90 time:1000 & PattesArriere3=0 time:1000; // draw aside the back legs 
+
+
+   PattesArriere1=-57 time:1000;
+   PattesArriere2=50 time:1000;
+   PattesArriere2=90 time:1000;
+   PattesArriere2=50 time:1000;
+   PattesArriere1=100 time:2000 & PattesArriere2=90 time:1000 | PattesArriere2=0 time:1000;
+
+   // PattesArriere2 last 1 more second 
+   PattesArriere2=90 time:2000;
+   PattesArriere1=-59 time:500;
+   PattesArriere2=0 time:500;
+
+   // End 30 seconds
+};
+
+
+function PattesAvant() // dance for the front legs, lasting 5 seconds 
+{
+
+   wait (4000);
+
+   PattesAvant1=100 time:1000; // Raise the 2 front legs 
+
+
+   wait (1000);
+
+   legLF3=0 time:1000; // Lower a little the left leg 
+
+   legRF3=0 time:1000 & legLF3=60 time:1000; // Raise the right leg and lowers the left
+
+   legLF3=0 time:1000 & legRF3=60 time:1000; // Raise the left leg and lowers the right 
+
+   legRF3=0 time:1000 & legLF3=60 time:1000; // Even action
+
+
+   legLF3=0 time:1000 & legRF3=60 time:1000; // Even action
+
+   legRF3=0 time:1000 & legLF3=60 time:1000; // Even action
+
+   legLF3=0 time:1000 & legRF3=60 time:1000; // Even action
+
+   legLF3=0 time:1000 & legRF3=60 time:1000; // Even action 
+
+
+   legRF3=0 time:1000 & legLF3=60 time:1000; // Even action
+
+
+   legLF3=0 time:1000 & legRF3=60 time:1000; // Even action
+
+   legRF2=90 time:1000 & legLF2=90 time:1000; // draw aside the front legs 
+
+   PattesAvant2=0 time:1000; // Bring closer the front legs 
+
+   wait (1000);
+
+   PattesAvant3=0 time:1000 & 
+   PattesAvant1=40 time:1000; // Lower the front legs 
+
+
+   wait (2000);
+   PattesAvant3=110 time:1000; // Raise the end of the front legs
+   PattesAvant3=0 time:1000 & PattesAvant1=80 time:1000; // Stretch the legs forwards 
+   PattesAvant3=110 time:1000; // Raise the end of the front legs 
+
+   PattesAvant3=0 time:1000 & PattesAvant1=130 time:1000; // stretch the legs upwards 
+   legRF2=40 time:1000; // draw aside a little the right leg
+   wait (1000);
+   legLF2=40 time:1000; // draw aside a little the left leg 
+   wait (1000);
+
+   // End of 30 seconds
+};
+
+function Tete() // dance for the head
+{
+   neck=2 time:5000 & headTilt=10 time:5000; // We raise the neck and the head during 5 seconds 
+
+   timeout(10s) oui:headTilt=10 sin:2000 ampli:40, //  the comma puts this task in background... while the movement is executed we will be able to do one wait in order to make another movement later 
+   wait (15000);
+
+   timeout(10s) non:headPan=0 sin:2000 ampli:-45,
+   wait (15000);
+
+   headPan=-30 time:500; // Turn the head on the right 
+   wait (500);
+   headPan=30 time:1000; // Return to 0 then turn the head on the left
+   wait (1000);
+   headPan=0 time:1000 & neck=2 time:1000 & headTilt=44 time:1000;
+   mouth=-58 time:500;// Open the mouth 
+   mouth=-3 time:500;
+   earL=1 & earR=1; wait (100ms); // Move the ears 
+   earL=0 & earR=0; wait (100ms);
+   earL=1 & earR=1; wait (100ms);
+   earL=0 & earR=0; wait (100ms);
+   earL=1 & earR=1; wait (100ms);
+
+   // End 30 seconds  
+};
+
+function Queue() // Procedure for the tail 
+{
+   tailTilt=0 time:2000;
+   timeout(28s) mouvementqueue:tailPan=0 sin:2000 ampli:40,
+  
+   // End 30 seconds 
+};
+
+function setLumieres()// Procedure for the eyes 
+{
+   Yeux=1;
+   modeB=1;
+   ledBFC=1;
+};
+
+// Main Program
+Initialisation();
+wait (500);
+
+son:speaker.play("tecno.wav"), // a comma to put the music in background 
+wait (6000);
+PattesArriere()&PattesAvant()&Tete()&Queue()&setLumieres(); // We launch all the procedures at the same time so that the Aibo dance
+
+wait (2000);
+Initialisation();

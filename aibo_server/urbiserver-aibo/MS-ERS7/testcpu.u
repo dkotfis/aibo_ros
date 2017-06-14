@@ -1,0 +1,48 @@
+# Measures the maximal number of commands "f" running in parallel
+# Default command if "f" == "" is a sinusoidal assignment.
+# The current result for ERS7 is 1350 sin in parallel (v0.9.7)
+
+function testcpu(f)
+{
+  if (f=="") f="x = 0 sin:1000 ampli:100";
+  f=f+";";
+  x=0;
+  cpu = 0;
+  maxi = 200;
+
+  echo "Testing max..."; 
+  while (cpu<120) { 
+ 
+    echo "  Trying "+string(maxi);
+    testing:{loopn &(maxi) exec(f)},
+    wait (500);
+    cpu = 0;
+    loopn (100) cpu = cpu + cpuload();
+
+    if (cpu<120) 
+      maxi = maxi *2;
+    stop testing;
+  };
+  maxi = maxi * 2; // security overhead
+
+  // main dichotomy
+
+  maxsin = maxi;
+  minsin = 0;
+  while (maxsin - minsin > 50) {
+    echo "Reducing "+string(minsin)+" .. "+string(maxsin);
+    middle = (maxsin + minsin)/2;
+    testing:{loopn &(middle) x = 0 sin:1000 ampli:100},     
+    wait(500);
+    cpu = 0;
+    loopn (100) cpu = cpu + cpuload();
+  
+    if (cpu>120) 
+      maxsin = middle 
+    else
+      minsin = middle;
+
+    stop testing;
+  }; 
+  echo "Max number of sinusoidal assignments: "+string(middle);
+};

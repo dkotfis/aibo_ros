@@ -1,0 +1,192 @@
+
+    ######################################################
+    #     URBI 12 JOINT WALK Ver.0.0.2 Beta 0            #
+    #      by Diego Pardo - Copyright 2006 Gostai SAS    #
+    ######################################################
+    #
+    #   robot.swalk(n)  :  Standind-Walk n Steps
+    #                      Walk Backward if n is negative
+    #   robot.sturn(n)  :  Standing-Turn n Steps
+    #                      Turn in opposite dir. if neg.
+    #
+    #   Note :  The following functions enable/disable the
+    #           walking control systems.(Default = false)
+    #           (see NegativeObstacleDetection.u)
+    #
+    #      robot.CliffeDetection(TRUE/FALSE)
+    #      robot.ObstacleDetection(TRUE/FALSE)
+    #
+    #
+    #
+    ######################################################
+
+    // Patterns most be loaded see file swpatt.u
+    // Obstacle Detection file must be loaded  swnobsta.u
+
+    load("swpatt.u");    // Patterns : Joint Data
+    load("swnobsta.u");  // Negative Obstacle Detection Rutines (must be actived by user)
+    load("swtrans.u");   // The Posture & Transition Scripts
+
+    if (isdef(robot.swalk)) {
+  
+      undef robot.swalk;
+      undef robot.sturn;
+    };
+
+    function robot.swalk(Wsteps)
+    {
+
+        robot.StandUp() |
+        robot.swInitialPos();
+        {
+        if(robot.cliffdetect==true)                // is cliffdetect activate
+        {
+           robot.cliffinitialization();
+           cdetect : every(200ms) robot.cliffalert(),
+           neck=0 smooth : 1s,
+        } else stop cdetect,
+
+        if(robot.obstacledetect==true)            // is obstacledetect activate
+        {
+           robot.odinitialization();
+           neck=-20 | headPan = 0 smooth :1s, headTilt = 0 smooth :1s;
+           odetect : every(300ms) robot.obstaclealert(),
+        } else stop odetect,
+
+
+        if(Wsteps<0) {stop cdetect & stop odetect};
+
+        gait:robot.NormalWalk(Wsteps);
+        stop cdetect;
+        stop odetect;}
+    };
+
+
+
+    #################### Walk Control Function ##########
+
+    function robot.NormalWalk(Wsteps)
+    {
+      neck=-20 smooth :1s, headPan = 0 smooth :1s, headTilt = 0 smooth :1s,
+      if (Wsteps < 0) direction = 0 else direction = 1;
+      Wsteps=abs(Wsteps);
+      for| (j=0;j<Wsteps;j++)
+        for& (m=0;m<6;m++)
+          robot.JF(m,direction)
+    };
+
+
+    ############# Joints Control Function - JF  ##########
+    #
+    # The Left/Right Signals are shifted 180°
+    #
+    ######################################################
+
+    function robot.JF (joint,direction)
+    {    
+      a=0;
+      k=31;
+      for| (i=0;i<62;i++) {
+        {
+          $(swalk.name[joint][0])=swalk.pattern[joint][a] & 
+          $(swalk.name[joint][1])=swalk.pattern[joint][k]
+        } | noop |
+        { 
+          if (direction) a++ else a--;          // bidirectional stuff
+          if (a<0) a=61 else {if(a>61) a=0};
+          if (a<31) k=a+31 else k=a-31;
+        }
+      }
+    };
+
+
+    function robot.swInitialPos()
+    {
+      tail=0 smooth:1000;
+
+      for & (j=0;j<6;j++) { 
+         $(swalk.name[j][0])=swalk.pattern[j][0] smooth:800 & 
+         $(swalk.name[j][1])=swalk.pattern[j][31] smooth:800 
+      };
+      wait(300);
+    };
+
+
+
+  function robot.sturn(Wsteps)
+  {
+      robot.StandUp();
+      for (j=0;j<abs(Wsteps);j++)
+      {
+      if(Wsteps<0) a=21 else a=0;
+
+          if(j==0) ctInitialPos() |
+
+      for |(i=0;i<22;i++)
+      {
+           wait(64) |
+           {
+            legRF1  = sturn.ctpattern[0][a] &    // could be compacted
+            legRF2  = sturn.ctpattern[1][a] &
+            legRF3  = sturn.ctpattern[2][a] &
+            legLF1  = sturn.ctpattern[3][a] &
+            legLF2  = sturn.ctpattern[4][a] &
+            legLF3  = sturn.ctpattern[5][a] &
+            legRH1  = sturn.ctpattern[6][a] &
+            legRH2  = sturn.ctpattern[7][a] &
+            legRH3  = sturn.ctpattern[8][a] &
+            legLH1  = sturn.ctpattern[9][a] &
+            legLH2  = sturn.ctpattern[10][a] &
+            legLH3  = sturn.ctpattern[11][a]
+            } |
+        if(Wsteps<0) a-- else a++;
+       }
+      };
+  };
+
+
+  function robot.ctInitialPos(){
+
+           wait(90) |
+           {
+            legRF1  = sturn.ctpattern[0][0] smooth:800 &
+            legRF2  = sturn.ctpattern[1][0] smooth:800 &
+            legRF3  = sturn.ctpattern[2][0] smooth:800 &
+
+            legLF1  = sturn.ctpattern[3][0] smooth:800 &
+            legLF2  = sturn.ctpattern[4][0] smooth:800 &
+            legLF3  = sturn.ctpattern[5][0] smooth:800 &
+
+            legRH1  = sturn.ctpattern[6][0] smooth:800 &
+            legRH2  = sturn.ctpattern[7][0] smooth:800 &
+            legRH3  = sturn.ctpattern[8][0] smooth:800 &
+
+            legLH1  = sturn.ctpattern[9][0] smooth:800 &
+            legLH2  = sturn.ctpattern[10][0] smooth:800 &
+            legLH3  = sturn.ctpattern[11][0] smooth:800
+           }
+
+  };
+
+    #################################
+    # Initial Position & PID SetUp  #
+    #################################
+
+    swalk.name[0][0] ="legRF1.val";swalk.name[0][1]="legLF1.val";
+    swalk.name[1][0] ="legRF2.val";swalk.name[1][1]="legLF2.val";
+    swalk.name[2][0] ="legRF3.val";swalk.name[2][1]="legLF3.val";
+    swalk.name[3][0] ="legRH1.val";swalk.name[3][1]="legLH1.val";
+    swalk.name[4][0] ="legRH2.val";swalk.name[4][1]="legLH2.val";
+    swalk.name[5][0] ="legRH3.val";swalk.name[5][1]="legLH3.val";
+
+
+    // PID Settings
+
+    tail=0;
+    mouth=0;
+    tailPan.PGain=7;
+    tailTilt.PGain=7;
+
+    legRF1.PGain=20;    legLF1.PGain=20;    legRF2.PGain=20;     legLF2.PGain=20;
+    legRF3.PGain=20;    legLF3.PGain=20;    legRH1.PGain=20;     legLH1.PGain=20;
+    legRH3.PGain=20;    legLH3.PGain=20;    legRH2.PGain=20;     legLH2.PGain=20;

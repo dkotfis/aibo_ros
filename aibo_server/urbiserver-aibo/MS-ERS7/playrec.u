@@ -1,0 +1,44 @@
+// Record and play positions:
+// Use the headSensor to store positions (a long pressure erase them)
+// Use the "chinsensor + Right Left Paw" to play the stored positions
+
+nbpos    = 0;
+pace     = 1000;
+
+record: 
+at (headSensor.val > 0) {
+
+  foreach& m in group motor {
+    position[nbpos][m] = $(m);
+  };
+  echo "Position "+string(nbpos)+" added.";
+  nbpos++;
+  speaker.play("beep.wav");
+},
+
+erase: 
+at (headSensor.val > 0 ~ 1s) {
+
+  nbpos = 0;
+  speaker.play("client.wav");
+  echo "All positions cleared.";
+},
+
+replay: 
+at ((pawRF.val) && (chinSensor.val) && (nbpos)) {
+
+  speaker.play("beep.wav") | wait 150 | speaker.play("beep.wav");
+  motor on;
+  foreach& m in group motor {
+    $(m) = position[0][m] smooth:pace;
+  };
+
+  for | (i=1;i<nbpos;i++) {
+
+    echo "Execute position "+string(i);
+    foreach& m in group motor {
+      $(m) = position[i][m] smooth:pace;
+    };
+  };
+  wait 2000 | motor off;
+},
